@@ -1,4 +1,4 @@
-#include "myhead.h"
+#include "../myhead.h"
 void fun(int connfd)
 {
 	ssize_t n;

@@ -32,7 +32,7 @@ int mySelect::run(const char *ip, const int port)
 
 	for (;;)
 	{
-		rset = allset;
+		rset = allset;//每次重新调用`select`函数时都必须把所有描述符集合中关心的位置为1 。
 		int nready = Select(maxfd + 1, &rset, NULL, NULL, NULL);
 		if (FD_ISSET(listenfd, &rset))
 		{

@@ -1,4 +1,20 @@
-#include "origin.h"
+#include "myhead.h"
+void fun(int connfd)
+{
+	ssize_t n;
+	char buf[1024] = {0};
+	while (1)
+	{
+		bzero(buf, sizeof(buf));
+		n = Recvline(connfd, buf, 1024, 0);
+		if (n <= 0)
+		{
+			Close(connfd);
+			break;
+		}
+		Sendlen(connfd, buf, n, 0);
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -14,6 +30,9 @@ int main(int argc, char **argv)
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(SERV_PORT); //9877
 
+	int opt = 1;
+	setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,(int *)&opt,sizeof(int));
+
 	Bind(listenfd, (SA *)&servaddr, sizeof(servaddr));
 
 	Listen(listenfd, LISTENQ);
@@ -21,12 +40,13 @@ int main(int argc, char **argv)
 	for (;;)
 	{
 		clilen = sizeof(cliaddr);
-		printf("111\n");
-		connfd = Accept(listenfd, (SA *)&cliaddr, &clilen, 3); //设置三秒时间，用于简单测试
-		printf("222\n");
-
-		sleep(10);
-		close(connfd);
+		connfd = Accept(listenfd, (SA *)&cliaddr, &clilen);
+		if ((childpid = Fork()) == 0)
+		{					 /* child process */
+			Close(listenfd); /* close listening socket */
+			fun(connfd);	 /* process the request */
+			exit(0);
+		}
+		Close(connfd); /* parent closes connected socket */
 	}
-	close(listenfd);
 }

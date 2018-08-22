@@ -1,23 +1,7 @@
 #include "unp.h"
+#include<stdio.h>
 
-int my_accept(int fd, struct sockaddr *sa, socklen_t *salenptr)
-{
-	int n;
 
-again:
-	if ((n = accept(fd, sa, salenptr)) < 0)
-	{
-#ifdef EPROTO
-		if (errno == EPROTO || errno == ECONNABORTED)
-#else
-		if (errno == ECONNABORTED)
-#endif
-			goto again;
-		else
-			printf("accept error");
-	}
-	return (n);
-}
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
@@ -30,7 +14,7 @@ int main(int argc, char **argv)
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(9888);
+	servaddr.sin_port = htons(SERV_PORT);
 
 	Bind(listenfd, (SA *)&servaddr, sizeof(servaddr));
 
@@ -39,7 +23,7 @@ int main(int argc, char **argv)
 	for (;;)
 	{
 		clilen = sizeof(cliaddr);
-		connfd = my_accept(listenfd, (SA *)&cliaddr, &clilen);
+		connfd = Accept(listenfd, (SA *)&cliaddr, &clilen);
 
 		if ((childpid = Fork()) == 0)
 		{					  /* child process */

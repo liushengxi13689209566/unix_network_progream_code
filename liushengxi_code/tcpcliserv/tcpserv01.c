@@ -7,15 +7,16 @@ void fun(int connfd)
 	{
 		bzero(buf, sizeof(buf));
 		n = Recvline(connfd, buf, 1024, 0);
+
 		if (n <= 0)
 		{
+			printf("对端关闭\n");
 			Close(connfd);
 			break;
 		}
 		Sendlen(connfd, buf, n, 0);
 	}
 }
-
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
@@ -31,7 +32,7 @@ int main(int argc, char **argv)
 	servaddr.sin_port = htons(SERV_PORT); //9877
 
 	int opt = 1;
-	setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,(int *)&opt,sizeof(int));
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (int *)&opt, sizeof(int));
 
 	Bind(listenfd, (SA *)&servaddr, sizeof(servaddr));
 
@@ -44,7 +45,11 @@ int main(int argc, char **argv)
 		if ((childpid = Fork()) == 0)
 		{					 /* child process */
 			Close(listenfd); /* close listening socket */
-			fun(connfd);	 /* process the request */
+
+			printf("新的连接：connfd== %d \n", connfd);
+
+			fun(connfd); /* process the request */
+
 			exit(0);
 		}
 		Close(connfd); /* parent closes connected socket */

@@ -57,6 +57,7 @@ void Close(int fd)
 	if (close(fd) == -1)
 		err_sys("close error", __LINE__);
 }
+/*代查*/
 ssize_t Sendlen(int fd, const void *buf, size_t len, int flags)
 {
 	ssize_t n = 0;
@@ -65,7 +66,7 @@ ssize_t Sendlen(int fd, const void *buf, size_t len, int flags)
 	ptr = (const char *)buf;
 	while (sum < len)
 	{
-		n = send(fd, buf, len, flags);
+		n = send(fd, (void *)ptr, len - sum, flags);
 		if (n < 0)
 		{
 			if (errno == EINTR)
@@ -86,7 +87,7 @@ ssize_t Recvlen(int fd, void *buf, size_t len, int flags) //待查
 	ptr = buf;
 	while (sum < len)
 	{
-		n = recv(fd, (void *)ptr, len, flags);
+		n = recv(fd, (void *)ptr, len - sum, flags);
 		if (n < 0)
 		{
 			if (errno == EINTR)
@@ -105,27 +106,14 @@ ssize_t Recvlen(int fd, void *buf, size_t len, int flags) //待查
 	}
 	return (sum);
 }
-ssize_t Recvline(int fd, void *buf, size_t Maxlen, int flags) //注意 Maxlen 参数
+
+/*代查*/
+int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+		   struct timeval *timeout)
 {
-	char temp, *ptr;
-	size_t n, rc;
-	ptr = buf;
-	for (n = 1; n < Maxlen; n++)
-	{
-		if ((rc = Recvlen(fd, &temp, 1, flags)) == 1)
-		{
-			*ptr++ = temp;
-			if (temp == '\n')
-				break;
-		}
-		else if (rc == 0)
-		{
-			*ptr = 0;
-			return (n - 1);
-		}
-		else
-			err_sys("readline error ", __LINE__);
-	}
-	*ptr = 0;
-	return (n);
+	int n;
+
+	if ((n = select(nfds, readfds, writefds, exceptfds, timeout)) < 0)
+		err_sys("select error", __LINE__);
+	return (n); /* can return 0 on timeout */
 }

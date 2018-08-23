@@ -45,11 +45,18 @@ int Bind(int fd, const struct sockaddr *sa, socklen_t salen);
 void Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *sa, socklen_t *salenptr);
 void Close(int fd);
+
+/*封装send与recv函数之类的*/
 ssize_t Sendlen(int fd, const void *buf, size_t len, int flags);
 ssize_t Recvlen(int fd, void *buf, size_t len, int flags);
 ssize_t Recvline(int fd, void *buf, size_t Maxlen, int flags); //注意 Maxlen 参数
 
+// 其余IO函数
+int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+		   struct timeval *timeout);
+
 /*基本系统调用（fork 等）的封装*/
 pid_t Fork(void);
+int Fcntl(int fd, int cmd, int arg);
 
 #endif

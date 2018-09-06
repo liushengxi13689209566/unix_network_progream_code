@@ -73,6 +73,7 @@ void start_connect(struct file *fptr) //非阻塞连接
 	ai = Host_serv(fptr->f_host, SERV, 0, SOCK_STREAM);
 	fd = Socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	fptr->f_fd = fd;
+
 	printf("start_connect  for %s ,fd %d \n", fptr->f_name, fd);
 
 	flags = Fcntl(fd, F_GETFL, 0);
@@ -157,7 +158,6 @@ nfiles:文件数量
 			nconn++;
 			nlefttoconn--;
 		}
-
 		/*连接全部完成*/
 		rs = rset;
 		rs = wset;

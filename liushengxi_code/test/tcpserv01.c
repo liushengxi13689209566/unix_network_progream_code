@@ -8,19 +8,16 @@ void fun(int *arg)
 	int connfd = *(int *)arg;
 	TEST test;
 	bzero(&test, sizeof(test));
-	n = Recvlen(connfd, &test, sizeof(TEST), 0);
+	n = recv(connfd, &test, sizeof(TEST), 0);
 	printf("n== %ld\n", n);
-	if (n == 0)
+	if (n <= 0)
 	{
-		printf("对端关闭\n");
 		epoll_ctl(epfd, EPOLL_CTL_DEL, connfd, &event);
 		Close(connfd);
 		pthread_exit(0);
 	}
 	else if (n > 0)
 		Sendlen(connfd, &test, sizeof(TEST), 0);
-	else
-		printf("Other error !!!!!\n");
 }
 int main(int argc, char **argv)
 {

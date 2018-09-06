@@ -18,7 +18,9 @@ main(int argc, char **argv)
 		file[i].f_host = argv[2];
 		file[i].f_flags = 0;
 	}
-	printf("nfiles = %d\n", nfiles);
+
+    fprintf(stderr,"kvbnbkenbkjenb\n");
+	fprintf(stderr,"nfiles = %d\n", nfiles);
 
 	home_page(argv[2], argv[3]);
 

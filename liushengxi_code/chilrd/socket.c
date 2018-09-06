@@ -7,13 +7,6 @@
 
 #include "../myhead.h"
 
-int err_sys(const char *err_string, int line)
-{
-	fprintf(stderr, "Error At line : %d \n", line); // 显示出错行
-	perror(err_string);								// err_string + 出错信息
-	exit(-1);
-}
-
 int Socket(int family, int type, int protocol)
 {
 	int n;
@@ -25,6 +18,7 @@ int Bind(int fd, const struct sockaddr *sa, socklen_t salen)
 {
 	if (bind(fd, sa, salen) < 0)
 		err_sys("bind error", __LINE__);
+	return 0;
 }
 void Listen(int fd, int backlog)
 {
@@ -99,7 +93,7 @@ ssize_t Recvlen(int fd, void *buf, size_t len, int flags) //待查
 		{
 			/*对端关闭连接了*/
 			printf("对端连接关闭！！！\n");
-			break;
+			return 0;
 		}
 		sum += n;
 		ptr += n;

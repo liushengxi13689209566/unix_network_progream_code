@@ -24,13 +24,25 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/epoll.h>
+#include <pthread.h>
+#include <netdb.h>
+#include <math.h>
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
 
 #define MAXLINE 1024
 #define SA struct sockaddr
 #define SERV_PORT 9877
 #define LISTENQ 1024
+
 /* 错误处理函数 */
-int err_sys(const char *err_string, int line);
+void err_dump(const char *, ...);
+void err_msg(const char *, ...);
+void err_quit(const char *, ...);
+void err_ret(const char *, ...);
+void err_sys(const char *, ...);
 
 /* 标准IO函数封装 */
 void Fclose(FILE *);
@@ -58,5 +70,13 @@ int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 /*基本系统调用（fork 等）的封装*/
 pid_t Fork(void);
 int Fcntl(int fd, int cmd, int arg);
+
+typedef struct info
+{
+	int i;
+	int j;
+	char temp;
+	char str[1024];
+} TEST;
 
 #endif

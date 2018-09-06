@@ -144,7 +144,6 @@ nlefttoread:待读取的文件数量
 nlefttoconn:尚未连接的文件数
 nfiles:文件数量
 */
-
 	while (nlefttoread > 0)
 	{
 		while (nconn < maxconn && nlefttoconn > 0)

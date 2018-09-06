@@ -6,7 +6,7 @@ if [ $1 ]; then
 fi
 
 #time ./web $maxnconn www.nipic.com / /show/8817711.html /show/8817712.html /show/8817713.html /show/8817714.html
-
+# 33 个文件
 time ./cli $maxnconn www.zcool.com.cn / \
 	/img.html#src=http://img.zcool.cn/haha.jpg\
 	/img.html#src=http://img.zcool.cn/community/015db259109624b5b3086ed4fa7b75.jpg\
@@ -41,4 +41,4 @@ time ./cli $maxnconn www.zcool.com.cn / \
 	/img.html#src=http://img.zcool.cn/community/013dc459115024b5b3086ed4b65d27.jpg\
 	/img.html#src=http://img.zcool.cn/community/01712559115019a801216a3ebb538a.jpg\
 	/img.html#src=http://img.zcool.cn/community/01131659115018b5b3086ed46a5e8c.jpg\
-#	>/dev/null	
+	>/dev/null	

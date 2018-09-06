@@ -61,9 +61,9 @@ void home_pages(const char *host, const char *fname)
 	{
 		if ((n = Recvlen(fd, line, MAXLINE, 0)) == 0)
 			break; //serv closed
-		printf("recv %d bytes from server \n", n);
+		printf(stderr,"recv %d bytes from server \n", n);
 	}
-	printf("end-of-home-pages\n");
+	fprintf(stderr,"end-of-home-pages\n");
 	Close(fd);
 }
 void start_connect(struct file *fptr) //非阻塞连接
@@ -74,7 +74,7 @@ void start_connect(struct file *fptr) //非阻塞连接
 	fd = Socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	fptr->f_fd = fd;
 
-	printf("start_connect  for %s ,fd %d \n", fptr->f_name, fd);
+	fprintf(stderr,"start_connect  for %s ,fd %d \n", fptr->f_name, fd);
 
 	flags = Fcntl(fd, F_GETFL, 0);
 	Fcntl(fd, F_SETFL, flags | O_NONBLOCK);
@@ -100,7 +100,7 @@ void write_get_cmd(struct file *fptr)
 	char line[MAXLINE];
 	n = snprintf(line, sizeof(line), GET_CMD, fptr->f_name);
 	Sendlen(fptr->f_fd, line, n, 0);
-	printf("send %d bytes for %s \n", n, fptr->f_name);
+	fprintf(stderr,"send %d bytes for %s \n", n, fptr->f_name);
 
 	fptr->f_flags = F_READING; /* clears F_CONNECTING */
 
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	fd_set rs, ws;
 	if (argc < 5)
 	{
-		printf("use :web conns hostname homepages files.....");
+		fprintf(stderr,"use :web conns hostname homepages files.....");
 		return 0;
 	}
 	maxconn = atoi(argv[1]);
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 		file[i].f_flags = 0;
 	}
 
-	printf("nfiles ==  %d \n", nfiles);
+	fprintf(stderr,"nfiles ==  %d \n", nfiles);
 
 	home_pages(argv[2], argv[3]); //建立第一个连接
 
@@ -174,9 +174,9 @@ nfiles:文件数量
 				n = sizeof(error);
 				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &n) < 0 || error != 0)
 				{
-					printf("nonblocking connect failed for %s ", file[i].f_name);
+					fprintf(stderr,"nonblocking connect failed for %s ", file[i].f_name);
 				}
-				printf("connection established for %s \n ", file[i].f_name);
+				fprintf(stderr,"connection established for %s \n ", file[i].f_name);
 				FD_CLR(fd, &wset);
 				write_get_cmd(&file[i]);
 			}
@@ -184,7 +184,7 @@ nfiles:文件数量
 			{ //有数据产生
 				if ((n = Recvlen(fd, buf, sizeof(buf), 0)) == 0)
 				{
-					printf("end-of-file on %s \n", file[i].f_name);
+					fprintf(stderr,"end-of-file on %s \n", file[i].f_name);
 					Close(fd);
 					file[i].f_flags = F_DONE;
 					FD_CLR(fd, &rset);
@@ -193,7 +193,7 @@ nfiles:文件数量
 				}
 				else
 				{
-					printf("read %d bytes from %s \n", n, file[i].f_name);
+					fprintf(stderr,"read %d bytes from %s \n", n, file[i].f_name);
 				}
 			}
 		}

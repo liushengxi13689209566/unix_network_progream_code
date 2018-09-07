@@ -14,7 +14,7 @@ void write_get_cmd(struct file *fptr);
 int Tcp_connect(const char *host, const char *serv)
 {
 	int sockfd, n;
-	struct addrinfo  hints, *res, *ressave;
+	struct addrinfo hints, *res, *ressave;
 	bzero(&hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -46,7 +46,10 @@ struct addrinfo *Host_serv(const char *host, const char *serv, int family, int s
 	hints.ai_socktype = socktype;
 
 	if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
-		err_sys("getaddrinfo  error", __LINE__);
+		err_quit("host_serv error for %s, %s: %s",
+				 (host == NULL) ? "(no hostname)" : host,
+				 (serv == NULL) ? "(no service name)" : serv,
+				 gai_strerror(n));
 	return (res);
 }
 
@@ -59,11 +62,11 @@ void home_pages(const char *host, const char *fname)
 	Sendlen(fd, line, n, 0);
 	for (;;)
 	{
-		if ((n = Recvlen(fd, line, MAXLINE, 0)) == 0)
+		if ((n = recv(fd, line, MAXLINE, 0)) == 0)
 			break; //serv closed
-		printf(stderr,"recv %d bytes from server \n", n);
+		fprintf(stderr, "recv %d bytes from server \n", n);
 	}
-	fprintf(stderr,"end-of-home-pages\n");
+	fprintf(stderr, "end-of-home-pages\n");
 	Close(fd);
 }
 void start_connect(struct file *fptr) //非阻塞连接
@@ -74,7 +77,7 @@ void start_connect(struct file *fptr) //非阻塞连接
 	fd = Socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	fptr->f_fd = fd;
 
-	fprintf(stderr,"start_connect  for %s ,fd %d \n", fptr->f_name, fd);
+	fprintf(stderr, "start_connect  for %s ,fd %d \n", fptr->f_name, fd);
 
 	flags = Fcntl(fd, F_GETFL, 0);
 	Fcntl(fd, F_SETFL, flags | O_NONBLOCK);
@@ -100,7 +103,7 @@ void write_get_cmd(struct file *fptr)
 	char line[MAXLINE];
 	n = snprintf(line, sizeof(line), GET_CMD, fptr->f_name);
 	Sendlen(fptr->f_fd, line, n, 0);
-	fprintf(stderr,"send %d bytes for %s \n", n, fptr->f_name);
+	fprintf(stderr, "send %d bytes for %s \n", n, fptr->f_name);
 
 	fptr->f_flags = F_READING; /* clears F_CONNECTING */
 
@@ -116,19 +119,19 @@ int main(int argc, char **argv)
 	fd_set rs, ws;
 	if (argc < 5)
 	{
-		fprintf(stderr,"use :web conns hostname homepages files.....");
+		fprintf(stderr, "use :web conns hostname homepages files.....");
 		return 0;
 	}
 	maxconn = atoi(argv[1]);
 	nfiles = min(argc - 4, MAXFILES);
-	for (int i = 0; i < nfiles; i++)
+	for (i = 0; i < nfiles; i++)
 	{
 		file[i].f_name = argv[i + 4];
 		file[i].f_host = argv[2];
 		file[i].f_flags = 0;
 	}
 
-	fprintf(stderr,"nfiles ==  %d \n", nfiles);
+	fprintf(stderr, "nfiles ==  %d \n", nfiles);
 
 	home_pages(argv[2], argv[3]); //建立第一个连接
 
@@ -149,10 +152,10 @@ nfiles:文件数量
 		while (nconn < maxconn && nlefttoconn > 0)
 		{
 			for (i = 0; i < nfiles; i++)
-			{
 				if (file[i].f_flags == 0) //表示等待连接??这是为什么呐？因为刚开始把他初始化为了 0
 					break;
-			}
+			if (i == nfiles)
+				err_quit("nlefttoconn = %d but nothing found", nlefttoconn);
 			start_connect(&file[i]);
 			nconn++;
 			nlefttoconn--;
@@ -173,17 +176,17 @@ nfiles:文件数量
 				n = sizeof(error);
 				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &n) < 0 || error != 0)
 				{
-					fprintf(stderr,"nonblocking connect failed for %s ", file[i].f_name);
+					fprintf(stderr, "nonblocking connect failed for %s ", file[i].f_name);
 				}
-				fprintf(stderr,"connection established for %s \n ", file[i].f_name);
+				fprintf(stderr, "connection established for %s \n ", file[i].f_name);
 				FD_CLR(fd, &wset);
 				write_get_cmd(&file[i]);
 			}
 			else if (flags & F_READING && FD_ISSET(fd, &rs))
 			{ //有数据产生
-				if ((n = Recvlen(fd, buf, sizeof(buf), 0)) == 0)
+				if ((n = recv(fd, buf, sizeof(buf), 0)) == 0)
 				{
-					fprintf(stderr,"end-of-file on %s \n", file[i].f_name);
+					fprintf(stderr, "end-of-file on %s \n", file[i].f_name);
 					Close(fd);
 					file[i].f_flags = F_DONE;
 					FD_CLR(fd, &rset);
@@ -192,7 +195,7 @@ nfiles:文件数量
 				}
 				else
 				{
-					fprintf(stderr,"read %d bytes from %s \n", n, file[i].f_name);
+					fprintf(stderr, "read %d bytes from %s \n", n, file[i].f_name);
 				}
 			}
 		}

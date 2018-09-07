@@ -10,7 +10,7 @@ start_connect(struct file *fptr)
 
 	fd = Socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	fptr->f_fd = fd;
-	printf("start_connect for %s, fd %d\n", fptr->f_name, fd);
+	fprintf(stderr,"start_connect for %s, fd %d\n", fptr->f_name, fd);
 
 		/* 4Set socket nonblocking */
 	flags = Fcntl(fd, F_GETFL, 0);

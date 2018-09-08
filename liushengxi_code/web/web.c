@@ -15,9 +15,11 @@ int Tcp_connect(const char *host, const char *serv)
 {
 	int sockfd, n;
 	struct addrinfo hints, *res, *ressave;
+
 	bzero(&hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
+
 	if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
 		err_quit("tcp_connect error for %s ,%s,%s : %s", host, serv, gai_strerror(n));
 	ressave = res;
@@ -62,7 +64,7 @@ void home_pages(const char *host, const char *fname)
 	Sendlen(fd, line, n, 0);
 	for (;;)
 	{
-		if ((n = recv(fd, line, MAXLINE, 0)) == 0)
+		if ((n = Recvlen(fd, line, MAXLINE, 0)) == 0)
 			break; //serv closed
 		fprintf(stderr, "recv %d bytes from server \n", n);
 	}
@@ -102,7 +104,9 @@ void write_get_cmd(struct file *fptr)
 	int n;
 	char line[MAXLINE];
 	n = snprintf(line, sizeof(line), GET_CMD, fptr->f_name);
-	Sendlen(fptr->f_fd, line, n, 0);
+
+	Writen(fptr->f_fd, line, n);
+
 	fprintf(stderr, "send %d bytes for %s \n", n, fptr->f_name);
 
 	fptr->f_flags = F_READING; /* clears F_CONNECTING */
@@ -112,6 +116,7 @@ void write_get_cmd(struct file *fptr)
 	if (fptr->f_fd > maxfd)
 		maxfd = fptr->f_fd;
 }
+
 int main(int argc, char **argv)
 {
 	int i, fd, n, maxconn, flags, error;
@@ -137,6 +142,7 @@ int main(int argc, char **argv)
 
 	FD_ZERO(&rset);
 	FD_ZERO(&wset);
+
 	maxfd = -1;
 	nlefttoread = nlefttoconn = nfiles;
 	nconn = 0;
@@ -151,8 +157,9 @@ nfiles:文件数量
 	{
 		while (nconn < maxconn && nlefttoconn > 0)
 		{
+			/* 4find a file to read */
 			for (i = 0; i < nfiles; i++)
-				if (file[i].f_flags == 0) //表示等待连接??这是为什么呐？因为刚开始把他初始化为了 0
+				if (file[i].f_flags == 0)
 					break;
 			if (i == nfiles)
 				err_quit("nlefttoconn = %d but nothing found", nlefttoconn);
@@ -160,9 +167,9 @@ nfiles:文件数量
 			nconn++;
 			nlefttoconn--;
 		}
-		/*连接全部完成*/
+
 		rs = rset;
-		rs = wset;
+		ws = wset;
 		n = Select(maxfd + 1, &rs, &ws, NULL, NULL);
 
 		for (i = 0; i < nfiles; i++)
@@ -171,31 +178,35 @@ nfiles:文件数量
 			if (flags == 0 || flags & F_DONE)
 				continue;
 			fd = file[i].f_fd;
-			if (flags & F_CONNECTING && (FD_ISSET(fd, &rs) || FD_ISSET(fd, &ws))) //非阻塞连接完成
+			if (flags & F_CONNECTING &&
+				(FD_ISSET(fd, &rs) || FD_ISSET(fd, &ws)))
 			{
 				n = sizeof(error);
-				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &n) < 0 || error != 0)
+				if (getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &n) < 0 ||
+					error != 0)
 				{
-					fprintf(stderr, "nonblocking connect failed for %s ", file[i].f_name);
+					err_ret("nonblocking connect failed for %s",
+							file[i].f_name);
 				}
-				fprintf(stderr, "connection established for %s \n ", file[i].f_name);
-				FD_CLR(fd, &wset);
-				write_get_cmd(&file[i]);
+				/* 4connection established */
+				fprintf(stderr, "connection established for %s\n", file[i].f_name);
+				FD_CLR(fd, &wset);		 /* no more writeability test */
+				write_get_cmd(&file[i]); /* write() the GET command */
 			}
 			else if (flags & F_READING && FD_ISSET(fd, &rs))
-			{ //有数据产生
-				if ((n = recv(fd, buf, sizeof(buf), 0)) == 0)
+			{
+				if ((n = read(fd, buf, sizeof(buf))) == 0)
 				{
-					fprintf(stderr, "end-of-file on %s \n", file[i].f_name);
+					fprintf(stderr, "end-of-file on %s\n", file[i].f_name);
 					Close(fd);
-					file[i].f_flags = F_DONE;
+					file[i].f_flags = F_DONE; /* clears F_READING */
 					FD_CLR(fd, &rset);
 					nconn--;
 					nlefttoread--;
 				}
 				else
 				{
-					fprintf(stderr, "read %d bytes from %s \n", n, file[i].f_name);
+					fprintf(stderr, "read %d bytes from %s\n", n, file[i].f_name);
 				}
 			}
 		}

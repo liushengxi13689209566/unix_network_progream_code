@@ -6,6 +6,7 @@
  ************************************************************************/
 
 #include "web.h"
+
 struct addrinfo *Host_serv(const char *host, const char *serv, int family, int socktype);
 void home_pages(const char *host, const char *fname);
 void start_connect(struct file *fptr); //非阻塞连接;
@@ -105,9 +106,9 @@ void write_get_cmd(struct file *fptr)
 	char line[MAXLINE];
 	n = snprintf(line, sizeof(line), GET_CMD, fptr->f_name);
 
-	Writen(fptr->f_fd, line, n);
+	Sendlen(fptr->f_fd, line, n,0);
 
-	fprintf(stderr, "send %d bytes for %s \n", n, fptr->f_name);
+	fprintf(stderr, "send %d bytes for %s \n\n\n", n, fptr->f_name);
 
 	fptr->f_flags = F_READING; /* clears F_CONNECTING */
 
@@ -187,6 +188,7 @@ nfiles:文件数量
 				{
 					err_ret("nonblocking connect failed for %s",
 							file[i].f_name);
+					file[i].f_flags = F_DONE;
 				}
 				/* 4connection established */
 				fprintf(stderr, "connection established for %s\n", file[i].f_name);

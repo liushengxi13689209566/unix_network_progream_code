@@ -28,6 +28,7 @@ get_ifi_info(int family, int doaliases)
 				break;		/* success, len has not changed */
 			lastlen = ifc.ifc_len;
 		}
+		/* 10个10个的加 */
 		len += 10 * sizeof(struct ifreq);	/* increment */
 		free(buf);
 	}
@@ -56,7 +57,8 @@ get_ifi_info(int family, int doaliases)
 			break;
 		}
 #endif	/* HAVE_SOCKADDR_SA_LEN */
-		ptr += sizeof(ifr->ifr_name) + len;	/* for next one in buffer */
+		ptr += sizeof(ifr->ifr_name) + len;	/*struct ifreq中有两种结构，一个是ifc_name,一个是套接字地址结构，
+		这里取得下一个套接字地址结构 */
 
 #ifdef	HAVE_SOCKADDR_DL_STRUCT
 		/* assumes that AF_LINK precedes AF_INET or AF_INET6 */

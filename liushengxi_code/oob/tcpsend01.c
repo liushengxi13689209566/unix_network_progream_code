@@ -25,7 +25,7 @@ int main(int argc,char **argv)
 	printf("Sendlen 56   of normal data \n");
 	sleep(1);
 
-	Sendlen(sockfd, "7", 1, MSG_OOB);
+	Sendlen(sockfd, "710", 3, MSG_OOB);
 	printf("Sendlen 7 of OOB data \n");
 	sleep(1);
 

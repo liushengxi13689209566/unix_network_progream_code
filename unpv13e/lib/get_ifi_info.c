@@ -57,7 +57,8 @@ get_ifi_info(int family, int doaliases)
 			break;
 		}
 #endif	/* HAVE_SOCKADDR_SA_LEN */
-		ptr += sizeof(ifr->ifr_name) + len;	/*struct ifreq中有两种结构，一个是ifc_name,一个是套接字地址结构，
+		ptr += sizeof(ifr->ifr_name) + len;	/*struct ifreq中有两种结构，
+		一个是ifc_name,一个是套接字地址结构，
 		这里取得下一个套接字地址结构 */
 
 #ifdef	HAVE_SOCKADDR_DL_STRUCT

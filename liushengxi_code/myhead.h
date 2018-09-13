@@ -58,6 +58,9 @@ void Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *sa, socklen_t *salenptr);
 void Close(int fd);
 
+int Tcp_connect(const char *host, const char *serv);
+int Tcp_listen(const char *host, const char *serv, socklen_t *addrlenp);
+
 /*封装send与recv函数之类的*/
 ssize_t Sendlen(int fd, const void *buf, size_t len, int flags);
 ssize_t Recvlen(int fd, void *buf, size_t len, int flags);

@@ -26,8 +26,8 @@ main(int argc, char **argv)
 	printf("wrote 1 byte of OOB data\n");
 	sleep(1);
 
-	Write(sockfd, "89", 2);
-	printf("wrote 2 bytes of normal data\n");
+	Send(sockfd, "89", 2,MSG_OOB);
+	printf("wrote 2 bytes of OOB data\n");
 	sleep(1);
 
 	exit(0);

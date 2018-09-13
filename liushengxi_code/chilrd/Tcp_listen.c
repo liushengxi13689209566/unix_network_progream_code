@@ -1,5 +1,11 @@
-/* include tcp_listen */
-#include "unp.h"
+/*************************************************************************
+	> File Name: ./chilrd/Tcp_xxx.c
+	> Author: Liu Shengxi 
+	> Mail: 13689209566@163.com
+	> Created Time: 2018年09月13日 星期四 21时54分00秒
+ ************************************************************************/
+
+#include"../myhead.h"
 
 int tcp_listen(const char *host, const char *serv, socklen_t *addrlenp)
 {
@@ -23,7 +29,7 @@ int tcp_listen(const char *host, const char *serv, socklen_t *addrlenp)
 		if (listenfd < 0)
 			continue; /* error, try next one */
 
-		Setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+		setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 		if (bind(listenfd, res->ai_addr, res->ai_addrlen) == 0)
 			break; /* success */
 
@@ -42,13 +48,6 @@ int tcp_listen(const char *host, const char *serv, socklen_t *addrlenp)
 
 	return (listenfd);
 }
-/* end tcp_listen */
-
-/*
- * We place the wrapper function here, not in wraplib.c, because some
- * XTI programs need to include wraplib.c, and it also defines
- * a Tcp_listen() function.
- */
 
 int Tcp_listen(const char *host, const char *serv, socklen_t *addrlenp)
 {

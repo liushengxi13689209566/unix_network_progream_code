@@ -57,6 +57,11 @@ int Bind(int fd, const struct sockaddr *sa, socklen_t salen);
 void Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *sa, socklen_t *salenptr);
 void Close(int fd);
+void Setsockopt(int fd,int level,int optname,const void *optval,socklen_t optlen);
+int Sockatmark(int fd);
+
+
+
 
 int Tcp_connect(const char *host, const char *serv);
 int Tcp_listen(const char *host, const char *serv, socklen_t *addrlenp);

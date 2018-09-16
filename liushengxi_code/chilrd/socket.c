@@ -111,3 +111,15 @@ int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 		err_sys("select error", __LINE__);
 	return (n); /* can return 0 on timeout */
 }
+void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen)
+{
+	if (setsockopt(fd, level, optname, optval, optlen) < 0)
+		err_sys("setsockopt error");
+}
+int Sockatmark(int fd)
+{
+	int n;
+	if ((n = sockatmark(fd)) < 0)
+		err_sys("sockatmark error");
+	return (n);
+}

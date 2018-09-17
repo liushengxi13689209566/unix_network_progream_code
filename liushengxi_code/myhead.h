@@ -57,11 +57,8 @@ int Bind(int fd, const struct sockaddr *sa, socklen_t salen);
 void Listen(int fd, int backlog);
 int Accept(int fd, struct sockaddr *sa, socklen_t *salenptr);
 void Close(int fd);
-void Setsockopt(int fd,int level,int optname,const void *optval,socklen_t optlen);
+void Setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen);
 int Sockatmark(int fd);
-
-
-
 
 int Tcp_connect(const char *host, const char *serv);
 int Tcp_listen(const char *host, const char *serv, socklen_t *addrlenp);
@@ -70,6 +67,8 @@ int Tcp_listen(const char *host, const char *serv, socklen_t *addrlenp);
 ssize_t Sendlen(int fd, const void *buf, size_t len, int flags);
 ssize_t Recvlen(int fd, void *buf, size_t len, int flags);
 ssize_t Recvline(int fd, void *buf, size_t Maxlen, int flags); //注意 Maxlen 参数
+ssize_t Read(int fd, void *ptr, size_t nbytes);
+void Write(int fd, void *ptr, size_t nbytes);
 
 // 其余IO函数
 int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,

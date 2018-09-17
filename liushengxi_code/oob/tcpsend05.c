@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	char buff[16384] = {0};
 	Sendlen(sockfd, buff, 16384, 0);
 	printf("Sendlen 16384  of normal data \n");
-	sleep(5);
+	sleep(5); //一下子就将对端的接受缓冲区填满
 
 	Sendlen(sockfd, "4", 1, MSG_OOB);
 	printf("Sendlen 1 bytes  of OOB data \n");

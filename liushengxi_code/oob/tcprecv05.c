@@ -16,6 +16,8 @@ void sig_urg(int signo)
 	printf("SIGURG recvied\n");
 	n = recv(connfd, buff, sizeof(buff) - 1, MSG_OOB);
 	buff[n] = 0;
+	if(errno ==  EWOULDBLOCK )
+		printf("that's right!!!!!\n");
 	printf("recv %d OOb bytes: %s \n", n, buff);
 }
 int main(int argc, char **argv)
@@ -33,7 +35,7 @@ int main(int argc, char **argv)
 	Setsockopt(listenfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size)); //设置接受缓冲区大小
 
 	connfd = Accept(listenfd, NULL, NULL);
-	
+
 	signal(SIGURG, sig_urg);
 	Fcntl(connfd, F_SETOWN, getpid());
 

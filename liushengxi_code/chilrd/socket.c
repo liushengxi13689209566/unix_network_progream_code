@@ -100,8 +100,21 @@ ssize_t Recvlen(int fd, void *buf, size_t len, int flags) //待查
 	}
 	return (sum);
 }
+ssize_t
+Read(int fd, void *ptr, size_t nbytes)
+{
+	ssize_t n;
 
-/*代查*/
+	if ((n = read(fd, ptr, nbytes)) == -1)
+		err_sys("read error");
+	return (n);
+}
+void Write(int fd, void *ptr, size_t nbytes)
+{
+	if (write(fd, ptr, nbytes) != nbytes)
+		err_sys("write error");
+}
+
 int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 		   struct timeval *timeout)
 {

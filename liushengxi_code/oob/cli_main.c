@@ -77,6 +77,8 @@ int main(int argc, char **argv)
 
 	connect(sockfd, (SA *)&servaddr, sizeof(servaddr));
 
+	printf("sockfd ==  %d\n",sockfd);
+
 	fun_client(stdin, sockfd);
 
 	exit(0);

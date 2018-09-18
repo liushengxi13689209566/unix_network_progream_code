@@ -1,16 +1,20 @@
 
 
-
 #include "../myhead.h"
 #include "test.h"
 
-void fun_serv(int connfd)
+void fun_serv(int connfd) //子进程运行函数
 {
     ssize_t n;
     char buf[MAXLINE];
+
+    heartbeat_serv(connfd, 1, 5);
+
 again:
-    while ((n = read(connfd, buf, MAXLINE)) > 0)
+    while ((n = read(connfd, buf, MAXLINE)) > 0){
+        printf("buf== %s\n",buf);
         Sendlen(connfd, buf, n, 0);
+    }
     if (n < 0 && errno == EINTR)
         goto again;
     else if (n < 0)
@@ -37,8 +41,6 @@ int main(int argc, char **argv)
     Bind(listenfd, (SA *)&servaddr, sizeof(servaddr));
 
     Listen(listenfd, LISTENQ);
-
-    heartbeat_serv(listenfd,1,5);
 
     for (;;)
     {

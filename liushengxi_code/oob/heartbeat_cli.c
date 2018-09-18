@@ -16,9 +16,12 @@ static void sig_urg(int), sig_alrm(int); // alarm 是为了轮询
 
 void heartbeat_cli(int servfd_arg, int nsec_arg, int maxnprobes_arg) //fd  1 5
 {
+	sleep(6);
+	
 	servfd = servfd_arg;
 	nsec = nsec_arg;
 	maxnprobes = maxnprobes_arg;
+
 	nprobes = 0;
 	signal(SIGURG, sig_urg);
 	Fcntl(servfd, F_SETOWN, getpid());
@@ -29,10 +32,14 @@ void heartbeat_cli(int servfd_arg, int nsec_arg, int maxnprobes_arg) //fd  1 5
 
 static void sig_urg(int signo)
 {
+	printf("产生  SIGURG 信号 \n");
+
 	int n;
 	char ch;
 	if ((n = recv(servfd, &ch, 1, MSG_OOB)) < 0)//只要产生带外数据，就说明服务器主机是存活的
 	{
+		printf("客户端接收到带外数据\n");
+
 		if (errno != EWOULDBLOCK)
 			err_sys("revc error");
 	}
@@ -44,10 +51,17 @@ static void sig_alrm(int signo)
 {
 	if (++nprobes > maxnprobes)
 	{
-		fprintf(stderr, "server is unreachable\n");
+		fprintf(stderr, "此客户端 gg，关掉套接字，断开连接，推出客户端  \n");
+		Close(servfd);
 		exit(0);
 	}
+
+	printf("servfd==%d\n",servfd);
+
 	send(servfd, "1", 1, MSG_OOB);
+
+	printf("客户端发送了带外数据\n");
+
 	alarm(nsec);
 	return;
 }

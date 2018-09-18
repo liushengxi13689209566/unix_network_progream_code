@@ -7,8 +7,9 @@
 /*这是客户端哦！！！！ */
 
 #include "../myhead.h"
+#include "test.h"
 
-void fun_client(FILE *fp, int connfd)
+void fun_client(FILE *fp, int sockfd)
 {
 	int maxfdp1, stdineof;
 	fd_set rset;
@@ -16,24 +17,32 @@ void fun_client(FILE *fp, int connfd)
 	int n;
 	FD_ZERO(&rset);
 	stdineof = 0;
-	heartbeat_cli(sockfd,1,5);
+	heartbeat_cli(sockfd, 1, 5); // 1.调用函数
 	for (;;)
 	{
 		if (stdineof == 0)
-			FD_SET(fileno(fd), &rset);
+			FD_SET(fileno(fp), &rset);
 		FD_SET(sockfd, &rset);
 		maxfdp1 = max(fileno(fp), sockfd) + 1;
-		Select(maxfdp1, &rset, NULL, NULL, NULL);
+
+		if ((n = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) // 2.处理 select
+		{
+			if (errno == EINTR)
+				continue;
+			else
+				err_sys("select error");
+		}
+
 		if (FD_ISSET(sockfd, &rset))
 		{
-			if ((n = recv(sockfd, buf, MAXLINE, 0)) == 0)
+			if ((n = Read(sockfd, buf, MAXLINE)) == 0)
 			{
 				if (stdineof == 1)
 					return;
 				else
 					err_quit("fun_client:server terminated permaturely ");
 			}
-			send(fileno(stdout), buf, n, 0);
+			Write(fileno(stdout), buf, n);
 		}
 		if (FD_ISSET(fileno(fp), &rset))
 		{
@@ -41,10 +50,10 @@ void fun_client(FILE *fp, int connfd)
 			{
 				stdineof = 1;
 				shutdown(sockfd, SHUT_WR);
-				FD_CTL(fileno(fp), &rset);
+				FD_CLR(fileno(fp), &rset);
 				continue;
 			}
-			Sendlen(sockfd, buf, n, 0);
+			Sendlen(sockfd, buf, n, 0); //调用 writen 函数
 		}
 	}
 }

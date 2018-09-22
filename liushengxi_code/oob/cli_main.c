@@ -17,7 +17,9 @@ void fun_client(FILE *fp, int sockfd)
 	int n;
 	FD_ZERO(&rset);
 	stdineof = 0;
+
 	heartbeat_cli(sockfd, 1, 5); // 1.调用函数
+
 	for (;;)
 	{
 		if (stdineof == 0)
@@ -25,9 +27,9 @@ void fun_client(FILE *fp, int sockfd)
 		FD_SET(sockfd, &rset);
 		maxfdp1 = max(fileno(fp), sockfd) + 1;
 
-		if ((n = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) // 2.处理 select
+		if ((n = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) 
 		{
-			if (errno == EINTR)
+			if (errno == EINTR) // 2.处理 select
 				continue;
 			else
 				err_sys("select error");
@@ -35,7 +37,7 @@ void fun_client(FILE *fp, int sockfd)
 
 		if (FD_ISSET(sockfd, &rset))
 		{
-			if ((n = Read(sockfd, buf, MAXLINE)) == 0)
+			if ((n = Recvline(sockfd, buf, MAXLINE,0)) == 0)
 			{
 				if (stdineof == 1)
 					return;
@@ -53,7 +55,7 @@ void fun_client(FILE *fp, int sockfd)
 				FD_CLR(fileno(fp), &rset);
 				continue;
 			}
-			Sendlen(sockfd, buf, n, 0); //调用 writen 函数
+			Sendlen(sockfd, buf, n, 0); //3.调用 writen 函数
 		}
 	}
 }
@@ -76,8 +78,6 @@ int main(int argc, char **argv)
 	inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
 
 	connect(sockfd, (SA *)&servaddr, sizeof(servaddr));
-
-	printf("sockfd ==  %d\n",sockfd);
 
 	fun_client(stdin, sockfd);
 

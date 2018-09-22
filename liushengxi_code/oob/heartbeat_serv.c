@@ -32,15 +32,16 @@ static void sig_urg(int signo)
     if ((n = recv(servfd, &ch, 1, MSG_OOB)) < 0) //只要产生带外数据，就说明客户端主机是存活的
     {
         if (errno != EWOULDBLOCK)
-            err_sys("revc error");
+            err_sys("recv error");
     }
-    if (n > 0)
+    else if (n > 0)
+    {
         printf("服务器接收到带外数据，说明客户端主机是存活的\n");
 
-    send(servfd, &ch, 1, MSG_OOB);
-    printf("服务器发送了带外数据\n");
-
-    nprobes = 0;
+        send(servfd, &ch, 1, MSG_OOB);
+        printf("服务器发送了带外数据\n");
+        nprobes = 0;
+    }
     return;
 }
 static void sig_alrm(int signo)

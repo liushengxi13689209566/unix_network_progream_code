@@ -6,19 +6,20 @@
 void fun_serv(int connfd) //子进程运行函数
 {
     ssize_t n;
-    char buf[MAXLINE];
+    char line[MAXLINE];
 
     heartbeat_serv(connfd, 1, 5);
 
-again:
-    while ((n = read(connfd, buf, MAXLINE)) > 0){
-        printf("buf== %s\n",buf);
-        Sendlen(connfd, buf, n, 0);
+    for (;;)
+    {
+        if ((n = Recvline(connfd, line, MAXLINE, 0)) == 0)
+        {
+            printf("客户端关闭啦！！！\n");
+            return ; //对端关闭了
+        }
+        // printf("line==%s\n", line);
+        Sendlen(connfd, line, n, 0);
     }
-    if (n < 0 && errno == EINTR)
-        goto again;
-    else if (n < 0)
-        err_sys("fun_serv error");
 }
 
 int main(int argc, char **argv)
@@ -57,7 +58,7 @@ int main(int argc, char **argv)
         {                    /* child process */
             Close(listenfd); /* close listening socket */
 
-            printf("新的连接：connfd== %d \n", connfd);
+            printf(" 新的连接：connfd== %d \n", connfd);
 
             fun_serv(connfd); /* process the request */
 

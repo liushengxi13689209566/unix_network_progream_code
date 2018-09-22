@@ -58,9 +58,9 @@ ssize_t recvline(int fd, void *vptr, size_t maxlen, int flags)
 	return (n);
 }
 ssize_t Recvline(int fd, void *buf, size_t Maxlen, int flags)
-{ //注意参数 Maxlen
+{   //注意参数 Maxlen
 	ssize_t n;
 	if ((n = recvline(fd, buf, Maxlen, flags)) < 0)
-		err_sys("recvline error ", __LINE__);
+		err_sys("recvline error ");
 	return (n);
 }

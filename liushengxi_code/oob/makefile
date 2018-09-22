@@ -10,7 +10,3 @@ all:
 	#gcc  tcprecv05.c /home/Shengxi-Liu/unix_network_progream_code/liushengxi_code/chilrd/*.c -o recv05
 	gcc -g  cli_main.c heartbeat_cli.c /home/Shengxi-Liu/unix_network_progream_code/liushengxi_code/chilrd/*.c -o heart_cli
 	gcc -g serv_main.c heartbeat_serv.c /home/Shengxi-Liu/unix_network_progream_code/liushengxi_code/chilrd/*.c -o heart_serv
-
-
-	gcc -g  testcli.c heartbeat_cli.c /home/Shengxi-Liu/unix_network_progream_code/liushengxi_code/chilrd/*.c -o testcli
-	gcc -g  testserv.c heartbeat_serv.c /home/Shengxi-Liu/unix_network_progream_code/liushengxi_code/chilrd/*.c -o testserv

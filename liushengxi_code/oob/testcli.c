@@ -12,8 +12,8 @@ void fun_client(int connfd)
 	while (Fgets(sendline, MAXLINE, stdin) != NULL)
 	{
 		tt = Sendlen(connfd, sendline, strlen(sendline), 0);
-		/*阻塞于 Recvline 函数 */
-		if ( Recvline(connfd, recvline, sizeof(recvline), 0) == 0)
+		/*阻塞于 Read 函数 */
+		if (recv(connfd, recvline, sizeof(recvline), 0) == 0)
 		{
 			printf(" 对端关闭,客户端退出 \n");
 			Close(connfd);

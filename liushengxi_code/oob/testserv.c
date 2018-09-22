@@ -10,7 +10,7 @@ void fun(int connfd)
 	while (1)
 	{
 		bzero(buf, sizeof(buf));
-		n = Recvline(connfd, buf, 1024, 0);
+		n = recv(connfd, buf, 1024, 0);
 		if (n == 0)
 		{
 			printf("对端关闭\n");

@@ -11,15 +11,13 @@
 
 void fun_client(FILE *fp, int sockfd)
 {
-	int maxfdp1, stdineof;
+	int maxfdp1, stdineof = 0;
 	fd_set rset;
-	char buf[MAXLINE];
+	char recvline[MAXLINE], sendline[MAXLINE];
 	int n;
-	FD_ZERO(&rset);
-	stdineof = 0;
-
 	heartbeat_cli(sockfd, 1, 5); // 1.调用函数
 
+	FD_ZERO(&rset);
 	for (;;)
 	{
 		if (stdineof == 0)
@@ -27,7 +25,7 @@ void fun_client(FILE *fp, int sockfd)
 		FD_SET(sockfd, &rset);
 		maxfdp1 = max(fileno(fp), sockfd) + 1;
 
-		if ((n = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0) 
+		if ((n = select(maxfdp1, &rset, NULL, NULL, NULL)) < 0)
 		{
 			if (errno == EINTR) // 2.处理 select
 				continue;
@@ -37,28 +35,31 @@ void fun_client(FILE *fp, int sockfd)
 
 		if (FD_ISSET(sockfd, &rset))
 		{
-			if ((n = Recvline(sockfd, buf, MAXLINE,0)) == 0)
+			if ((n = Recvline(sockfd, recvline, MAXLINE, 0)) == 0) //读取一行,Readline 返回读取到的字节数
 			{
 				if (stdineof == 1)
 					return;
 				else
 					err_quit("fun_client:server terminated permaturely ");
 			}
-			Write(fileno(stdout), buf, n);
+
+			write(STDOUT_FILENO, recvline, n); //3.调用 write 函数，而不是 fputs
 		}
-		if (FD_ISSET(fileno(fp), &rset))
+		if (FD_ISSET(fileno(fp), &rset)) //可以进行输入了
 		{
-			if ((n = Read(fileno(fp), buf, MAXLINE)) == 0)
+			if (Fgets(sendline, MAXLINE, fp) == NULL)
 			{
 				stdineof = 1;
 				shutdown(sockfd, SHUT_WR);
 				FD_CLR(fileno(fp), &rset);
 				continue;
 			}
-			Sendlen(sockfd, buf, n, 0); //3.调用 writen 函数
+
+			Sendlen(sockfd, sendline, strlen(sendline), 0); 
 		}
 	}
 }
+
 int main(int argc, char **argv)
 {
 	int sockfd;
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_port = htons(SERV_PORT);
+	servaddr.sin_port = htons(SERV_PORT); // 9877
 	inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
 
 	connect(sockfd, (SA *)&servaddr, sizeof(servaddr));

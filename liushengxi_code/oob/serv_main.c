@@ -14,10 +14,10 @@ void fun_serv(int connfd) //子进程运行函数
     {
         if ((n = Recvline(connfd, line, MAXLINE, 0)) == 0)
         {
-            printf("客户端关闭啦！！！\n");
-            return ; //对端关闭了
+            printf("客 户 端 关  闭 啦 ！！！\n");
+            Close(connfd);
+            return ; 
         }
-        // printf("line==%s\n", line);
         Sendlen(connfd, line, n, 0);
     }
 }
@@ -55,15 +55,15 @@ int main(int argc, char **argv)
         }
 
         if ((childpid = Fork()) == 0)
-        {                    /* child process */
-            Close(listenfd); /* close listening socket */
+        {                    
+            Close(listenfd); 
 
-            printf(" 新的连接：connfd== %d \n", connfd);
+            printf(" 新的连接：connfd == %d \n", connfd);
 
-            fun_serv(connfd); /* process the request */
+            fun_serv(connfd); 
 
             exit(0);
         }
-        Close(connfd); /* parent closes connected socket */
+        Close(connfd); 
     }
 }

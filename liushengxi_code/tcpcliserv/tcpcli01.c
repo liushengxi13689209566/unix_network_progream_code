@@ -9,8 +9,11 @@ void fun_client(int connfd)
 	{
 		tt = Sendlen(connfd, sendline, strlen(sendline), 0);
 		/*阻塞于 Recvline 函数 */
-		if (Recvline(connfd, recvline, sizeof(recvline), 0) == 0)
-			err_sys("Recvline error ", __LINE__);
+//		if (Recvline(connfd, recvline, sizeof(recvline), 0) == 0)
+
+        tt = recv(connfd,recvline,sizeof(recvline),0);
+        printf("tt == %d \n",tt);
+
 		Fputs(recvline, stdout);
 	}
 }

@@ -15,6 +15,7 @@ void fun_client(FILE *fp, int sockfd)
 	fd_set rset;
 	char recvline[MAXLINE], sendline[MAXLINE];
 	int n;
+	
 	heartbeat_cli(sockfd, 1, 5); // 1.调用函数
 
 	FD_ZERO(&rset);
@@ -59,7 +60,25 @@ void fun_client(FILE *fp, int sockfd)
 		}
 	}
 }
+/*void fun_client00000(int connfd)
+{
+	char sendline[MAXLINE] = {0};
+	char recvline[MAXLINE] = {0};
+	int tt = 0;
 
+	while (Fgets(sendline, MAXLINE, stdin) != NULL)
+	{
+		tt = Sendlen(connfd, sendline, strlen(sendline), 0);
+
+		if ( Recvline(connfd, recvline, sizeof(recvline), 0) == 0)
+		{
+			printf("服 务 器 关 闭 连 接 退 出 \n");
+			Close(connfd);
+			return;
+		}
+		Fputs(recvline, stdout);
+	}
+}*/
 int main(int argc, char **argv)
 {
 	int sockfd;
@@ -80,7 +99,7 @@ int main(int argc, char **argv)
 
 	connect(sockfd, (SA *)&servaddr, sizeof(servaddr));
 
-	fun_client(stdin, sockfd);
+	fun_client(stdin,sockfd);
 
 	exit(0);
 }

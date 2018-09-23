@@ -22,7 +22,7 @@ void heartbeat_serv(int servfd_arg, int nsec_arg, int maxnalarms_arg) //fd  1 5
 
 static void sig_urg(int signo)
 {
-    printf("产生  SIGURG 信号 \n");
+    //printf("产生  SIGURG 信号 \n");
 
     int n;
     char ch;
@@ -34,10 +34,10 @@ static void sig_urg(int signo)
     }
     else if (n > 0)
     {
-        printf("服务器接收到带外数据，说明客户端主机是存活的\n");
+        //printf("服务器接收到带外数据，说明客户端主机是存活的\n");
 
         if (send(servfd, &ch, 1, MSG_OOB) > 0)
-            printf("服务器发送了带外数据\n");
+           // printf("服务器发送了带外数据\n");
         nprobes = 0;
     }
     return;
@@ -46,7 +46,8 @@ static void sig_alrm(int signo)
 {
     if (++nprobes > maxnalarms)
     {
-        fprintf(stderr, " 此客户端 gg，服务器子进程退出 \n");
+        fprintf(stderr, " 此客户端 gg，服务器子进程关闭套接字并退出 \n");
+        Close(servfd);
         exit(0); 
     }
     alarm(nsec);

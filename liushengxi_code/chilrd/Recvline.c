@@ -25,7 +25,6 @@ static ssize_t my_recv(int fd, char *ptr, int flags)
 		}
 		else if (recv_cnt == 0)
 		{
-			printf("66666\n");
 			return (0);
 		}
 		recv_ptr = recv_buf;

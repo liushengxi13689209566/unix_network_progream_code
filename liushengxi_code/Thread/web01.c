@@ -80,7 +80,7 @@ void *do_get_read(void *vptr)
 	fd = Tcp_connect(fptr->f_host, SERV); // 与服务器进行连接
 	fptr->f_fd = fd;
 	printf("do_get_read for %s,fd %d ,thread %d \n", fptr->f_name, fd, fptr->f_tid);
-	write_get_cmd(fptr);// 发出 get 请求
+	write_get_cmd(fptr); // 发出 get 请求
 	for (;;)
 	{
 		if ((n = recv(fd, line, MAXLINE, 0)) == 0)
@@ -148,14 +148,23 @@ int main(int argc, char **argv)
 				nlefttoconn--;
 			}
 		}
-		if ((n = thr_join(0, &tid, (void **)&fptr)) != 0) //只有 Solaris 系统中才有（等待任一线程结束）
+		// if ((n = thr_join(0, &tid, (void **)&fptr)) != 0) //只有 Solaris 系统中才有（等待任一线程结束）
+		// {
+		// 	errno = n;
+		// 	err_sys("thr_join error ");
+		// }
+		pthread_mutex_lock(&ndone_mutex);
+		while (ndone == 0)
+			pthread_cond_wait(&ndone_cond, &ndone_mutex);
+		for (i = 0; i < nfiles; i++)
 		{
-			errno = n;
-			err_sys("thr_join error ");
+			if (file[i].f_flags & F_DONE)
+				pthread_join(file[i].f_tid, (void **)&fptr);
 		}
 		nconn--;
 		nlefttoread--;
 		printf("thread id %d for %s done \n", tid, fptr->f_name);
 	}
+	pthread_mutex_unlock(&ndone_mutex);
 	exit(0);
 }

@@ -1,4 +1,11 @@
-#include "unpthread.h"
+/*************************************************************************
+	> File Name: example01..c
+	> Author: Liu Shengxi 
+	> Mail: 13689209566@163.com
+	> Created Time: 2018年09月26日 星期三 21时07分00秒
+ ************************************************************************/
+
+#include "../myhead.h"
 
 #define NLOOP 5000
 
@@ -10,12 +17,14 @@ int main(int argc, char **argv)
 {
 	pthread_t tidA, tidB;
 
-	Pthread_create(&tidA, NULL, &doit, NULL);
-	Pthread_create(&tidB, NULL, &doit, NULL);
+	pthread_create(&tidA, NULL, &doit, NULL);
+	pthread_create(&tidB, NULL, &doit, NULL);
 
 	/* 4wait for both threads to terminate */
-	Pthread_join(tidA, NULL);
-	Pthread_join(tidB, NULL);
+	pthread_join(tidA, NULL);
+	pthread_join(tidB, NULL);
+
+	printf("counter == %d \n",counter);
 
 	exit(0);
 }
@@ -39,3 +48,4 @@ doit(void *vptr)
 
 	return (NULL);
 }
+

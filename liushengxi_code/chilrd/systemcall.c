@@ -18,6 +18,20 @@ int Fcntl(int fd, int cmd, int arg)
 {
 	int n;
 	if ((n = fcntl(fd, cmd, arg)) < 0)
-		err_sys("fcntl error",  __LINE__);
+		err_sys("fcntl error", __LINE__);
 	return (n);
+}
+void *Malloc(size_t size)
+{
+	void *ptr;
+	if ((ptr = malloc(size)) == NULL)
+		err_sys("malloc error ");
+	return (ptr);
+}
+void Calloc(size_t n, size_t size)
+{
+	void *ptr;
+	if ((ptr = calloc(n,size)) == NULL)
+		err_sys("calloc error ");
+	return (ptr);
 }

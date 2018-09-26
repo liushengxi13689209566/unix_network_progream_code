@@ -2,6 +2,7 @@
     "files.associations": {
         "stdio.h": "c",
         "unp.h": "c",
-        "limits": "c"
+        "limits": "c",
+        "unpthread.h": "c"
     }
 }

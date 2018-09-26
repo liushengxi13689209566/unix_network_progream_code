@@ -28,6 +28,7 @@
 #include <pthread.h>
 #include <netdb.h>
 #include <math.h>
+#include <pthread.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -74,9 +75,12 @@ void Write(int fd, void *ptr, size_t nbytes);
 int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 		   struct timeval *timeout);
 
+
 /*基本系统调用（fork 等）的封装*/
 pid_t Fork(void);
 int Fcntl(int fd, int cmd, int arg);
+void *Malloc(size_t size);
+void Calloc(size_t n,size_t size);
 
 typedef struct info
 {

@@ -10,17 +10,22 @@
 void *handle(void *arg)
 {
     int i = *((int *)arg);
+    free(arg);
+    printf("线程：%d , 初始化 i == %d \n", pthread_self(), i);
     sleep(rand() % 10);
-    printf(" i == %d \n", i);
+    printf("线程：%d , 退出时 i == %d \n", pthread_self(), i);
     return 0;
 }
 int main(void)
 {
     pthread_t tid[MAX];
     int i;
+    int *iptr = NULL;
     for (i = 0; i < MAX; i++)
     {
-        pthread_create(&tid[i], NULL, handle, &i);
+        iptr = (int *)malloc(sizeof(int));
+        *iptr = i;
+        pthread_create(&tid[i], NULL, handle, iptr);
     }
     for (i = 0; i < MAX; i++)
     {

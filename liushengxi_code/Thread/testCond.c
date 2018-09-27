@@ -6,19 +6,17 @@ int ndone = 0;
 pthread_mutex_t ndone_mutex;
 pthread_cond_t ndone_cond;
 int data[MAX];
-int nleftthreads = MAX;
+int Decide = MAX;
 
 void *handle(void *arg)
 {
-    sleep(rand() % 10);
-
-    int tag = (int)arg;
+    sleep(5);
 
     pthread_mutex_lock(&ndone_mutex);
     printf("我要推出了哦！！我是 %d 号线程哦 ！！！\n", pthread_self());
     ndone++;
-    tag = 1;
-    nleftthreads--;
+    *((int *)arg) = 1;
+    Decide--;
     pthread_cond_signal(&ndone_cond);
     pthread_mutex_unlock(&ndone_mutex);
     return 0;
@@ -27,24 +25,27 @@ int main(void)
 {
     pthread_t tid[MAX];
     int i;
-    nleftthreads = MAX;
+    Decide = MAX;
     for (i = 0; i < MAX; i++)
     {
         data[i] = 0;
         pthread_create(&tid[i], NULL, handle, &data[i]);
     }
-    while (nleftthreads > 0)
+    while (Decide > 0)
     {
         pthread_mutex_lock(&ndone_mutex);
         while (ndone == 0) //说明没有任何线程退出
         {
             pthread_cond_wait(&ndone_cond, &ndone_mutex);
         }
-        //一定有某个线程退出
+        //一定有某个线程退出 
         for (i = 0; i < MAX; i++)
         {
-            if (data[i] == 1)
+            if (data[i] == 1){
+                printf("pthread_join 等待 %d 线程退出 \n",tid[i]);
                 pthread_join(tid[i], NULL);
+                data[i] = 0 ;
+            }
         }
         pthread_mutex_unlock(&ndone_mutex);
     }

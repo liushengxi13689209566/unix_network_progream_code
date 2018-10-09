@@ -30,10 +30,28 @@ void proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv)
 	struct ip *ip;
 	struct icmp *icmp;
 
-	struct timeval *tvsend ;
+	struct timeval *tvsend;
 	ip = (struct ip *)ptr;
-	hlen1 = ip->ip_hl << 2 ;
+	hlen1 = ip->ip_hl << 2;
+	if (ip->p != IPPROTO_ICMP)
+		return; //不是icmp
+	icmp = (struct icmp *)(ptr + hlen1);
+	if ((icmplen = len - hlen1) < 8)
+		return; //  ICMP 首部凑不齐，包异常
+	if (icmp->icmp_type == ICMP_ECHOREPLY)
+	{ //是 ICMP 回射应答
+		if (icmp->icmp_id != pid)
+			return; //说明不是本进程所需要的回应
+		if (icmplen < 16)
+			return; //没有足够的数据使用
 
+		tvsend = (struct timeval *)icmp->icmp_data;
+		tc_sub(tvrecv, tvsend);
+		rtt = tvrecv->tv_sec * 1000.0 + tvrecv->usec / 1000.0;
+
+		printf("%d bytes form %s : seq=%u,ttl=%d,rtt=%.3f ms\n",
+		icmplen,Sock_ntop_host(pr->sarecv,pr->salen),icmp->icmp_seq,ip->ip_ttl,rtt);
+	}
 }
 // 主函数
 void readloop()
@@ -79,22 +97,11 @@ int main(int argc, char **argv)
 	int c;
 	struct addrinfo *ai;
 	char *h;
-	opterr = 0; //不希望getopt()印出错信息，则只要将全域变量opterr 设为0 即可。
-	while ((c = getopt(argc, argv, "v")) != -1)
-	{
-		printf("c== %c \n", c);
-		switch (c)
-		{
-		case 'c':
-			verbose++;
-			break;
-		case '?':
-			err_quit("不支持的标志 : %c ", c);
-		}
-	}
-	if (optind != argc - 1)
-		err_quit("use : ping [ -v ] <hostname> ");
-	host = argv[optind];
+
+	if (argc != 2 )
+		err_quit("use : ping <hostname> ");
+	host = argv[1];
+	
 	pid = getpid() & 0xffff; //  ICMP 16位
 	signal(SIGALRM, sig_alrm);
 

@@ -33,7 +33,7 @@ proc_v4(char *ptr, ssize_t len, struct msghdr *msg, struct timeval *tvrecv)
 				icmp->icmp_seq, ip->ip_ttl, rtt);
 
 	} else if (verbose) {
-		printf("  %d bytes from %s: type = %d, code = %d\n",
+		printf("  %d bytes from %s: type = %d, code6666 = %d\n",
 				icmplen, Sock_ntop_host(pr->sarecv, pr->salen),
 				icmp->icmp_type, icmp->icmp_code);
 	}

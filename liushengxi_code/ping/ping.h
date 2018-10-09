@@ -19,7 +19,6 @@ char *host;
 int nsent;
 pid_t pid;
 int sockfd;
-int verbose;
 
 void init_v6(void);
 void proc_v4(char *, ssize_t, struct msghdr *, struct timeval *);

@@ -37,6 +37,6 @@ struct proto
 	struct sockaddr *sarecv;
 	socklen_t salen;
 	int icmpproto;
-} * pr;
+} *pr;
 
 #endif 

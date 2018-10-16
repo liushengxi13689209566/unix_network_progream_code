@@ -64,14 +64,15 @@ in_cksum(uint16_t *addr, int len)
 	answer = ~sum;						/* truncate to 16 bits */
 	return (answer);
 }
-void sig_alrm(int signo){
+void sig_alrm(int signo)
+{
 	(*pr->fsend)();
 	alarm(1);
-	return ;
+	return;
 }
 char *Sock_ntop_host(const struct sockaddr *sa, socklen_t salen)
 {
-	static char str[128]; 
+	static char str[128];
 	switch (sa->sa_family)
 	{
 	case AF_INET:
@@ -136,6 +137,7 @@ void readloop()
 	iov.iov_len = sizeof(recvbuf);
 	msg.msg_name = pr->sarecv;
 	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
 	msg.msg_control = controlbuf;
 	while (1)
 	{
@@ -157,7 +159,7 @@ void send_v4()
 {
 	int len;
 	struct icmp *icmp;
-	
+
 	icmp = (struct icmp *)sendbuf;
 	icmp->icmp_type = ICMP_ECHO;
 	icmp->icmp_code = 0;
@@ -174,7 +176,6 @@ void send_v4()
 }
 int main(int argc, char **argv)
 {
-	int c;
 	struct addrinfo *ai;
 	char *h;
 
@@ -187,11 +188,17 @@ int main(int argc, char **argv)
 
 	ai = Host_serv(host, NULL, 0, 0);
 	h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen); //将主机名转换为`ip`地址的功能,使用更加通用的协议 ipv6,简单一点就是 gethostbyname
-	printf("PING %s (%s):%d data bytes \n", ai->ai_canonname ? ai-> ai_canonname : h, h, datalen);
+	printf("PING %s (%s):%d data bytes \n", ai->ai_canonname ? ai->ai_canonname : h, h, datalen);
 	if (ai->ai_family == AF_INET)
 		pr = &proto_v4;
+	else if (ai->ai_family == AF_INET6)
+		err_quit("暂时不支持 IPV6");
+	else
+		err_quit("不知道的协议 :%d ", ai->ai_family);
+
 	pr->sasend = ai->ai_addr;
 	pr->sarecv = malloc(sizeof(ai->ai_addrlen));
+	pr->salen = ai->ai_addrlen;
 
 	readloop();
 

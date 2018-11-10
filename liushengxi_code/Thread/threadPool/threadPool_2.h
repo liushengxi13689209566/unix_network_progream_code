@@ -4,7 +4,6 @@
 	> Mail: 13689209566@163.com
 	> Created Time: 2018年10月14日 星期日 21时52分53秒
  ************************************************************************/
-
 #ifndef _THREADPOOL_H
 #define _THREADPOOL_H
 #include <vector>
@@ -14,47 +13,48 @@
 #include <stdexcept>
 #include <condition_variable>
 #include <memory> //unique_ptr
+#include <functional>
 
-const int MAX_REQUESTS = 20000; // 最大请求数目
-const int MAX_THREADS = 1000;   //最大线程数目
+const int MAX_THREADS = 1000; //最大线程数目
 
-template <typename T>
+typedef std::function<void(void)> Task;
+
 class threadPool
 {
   public:
-	threadPool(int number = 1); //默认开一个线程
+	/*默认开一个线程*/
+	threadPool(int number = 1);
 	~threadPool();
-	bool append(T *request);
+	/*往请求队列＜task_queue＞中添加任务<T *>*/
+	bool append(Task task);
+
+  private:
+	/*工作线程需要运行的函数,不断的从任务队列中取出并执行*/
 	static void *worker(void *arg);
 	void run();
 
   private:
-	std::vector<std::thread> work_threads;
-	std::queue<T *> tasks_queue;
+	std::vector<std::thread> work_threads; /*工作线程*/
+	std::queue<Task> tasks_queue;		   /*任务队列*/
 
 	std::mutex queue_mutex;
-	std::condition_variable condition;
+	std::condition_variable condition; /*必须与unique_lock配合使用*/
 	bool stop;
 };
 
-template <typename T>
-threadPool<T>::threadPool(int number) : stop(nullptr)
+threadPool::threadPool(int number) : stop(false)
 {
 	if (number <= 0 || number > MAX_THREADS)
 		throw std::exception();
-
 	for (int i = 0; i < number; i++)
 	{
-		std::thread temp(worker, this);
-		work_threads.emplace_back(temp);
-		temp.detach();
+		std::cout << "创建第" << i << "个线程 " << std::endl;
+		work_threads.emplace_back(threadPool::worker, this);
 	}
 }
 
-template <typename T>
-threadPool<T>::~threadPool()
+inline threadPool::~threadPool()
 {
-	work_threads.clear();
 	{
 		std::unique_lock<std::mutex> lock(queue_mutex);
 		stop = true;
@@ -64,50 +64,39 @@ threadPool<T>::~threadPool()
 		ww.join();
 }
 
-template <typename T>
-bool threadPool<T>::append(T *request)
+bool threadPool::append(Task task)
 {
 	/*操作工作队列时一定要加锁，因为他被所有线程共享*/
 	queue_mutex.lock();
-	if (tasks_queue.size() > MAX_REQUESTS)
-	{
-		queue_mutex.unlock();
-		return false;
-	}
-	tasks_queue.push(request);
+	tasks_queue.push(task);
 	queue_mutex.unlock();
 	condition.notify_one(); //线程池添加进去了任务，自然要通知等待的线程
 	return true;
 }
-
-template <typename T>
-void *threadPool<T>::worker(void *arg)
+void *threadPool::worker(void *arg)
 {
 	threadPool *pool = (threadPool *)arg;
 	pool->run();
 	return pool;
 }
-
-template <typename T>
-void threadPool<T>::run()
+void threadPool::run()
 {
 	while (!stop)
 	{
 		std::unique_lock<std::mutex> lk(this->queue_mutex);
-		this->condition.wait(lk, [this] { !this->tasks_queue.empty(); }); 
+		/*　unique_lock() 出作用域会自动解锁　*/
+		this->condition.wait(lk, [this] { return !this->tasks_queue.empty(); });
 		//如果任务队列不为空，就停下来等待唤醒
-
 		if (this->tasks_queue.empty())
 		{
-			queue_mutex.unlock();
 			continue;
 		}
-		T *request = tasks_queue.front();
-		tasks_queue.pop();
-		queue_mutex.unlock();
-		if (!request)
-			continue;
-		request->process();
+		else
+		{
+			Task task = tasks_queue.front();
+			tasks_queue.pop();
+			task();
+		}
 	}
 }
 #endif

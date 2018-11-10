@@ -5,26 +5,23 @@
 	> Created Time: 2018年10月15日 星期一 09时12分21秒
  ************************************************************************/
 
-#include "threadPool.h"
-#include<string>
+#include "threadPool_2.h"
 using namespace std;
-class Task
+class Test
 {
-	public:
-	void process()
+  public:
+	void process_no_static_bind(const int i, const int j) /*推荐使用*/
 	{
-		cout << "run........." << endl;
+		cout << "bind:  i==" << i << " "
+			 << "j==" << j << endl;
 	}
 };
 int main(void)
 {
-	threadPool<Task> pool(6);
-    std::string str;
-	while (1)
+	threadPool pool(6);
+	Test tt_bind;
+	while (true)
 	{
-			Task *tt = new Task();
-			//使用智能指针
-			pool.append(tt);
-            delete tt;
-    }
+		pool.append(std::bind(&Test::process_no_static_bind, &tt_bind, 3, 4));
+	}
 }

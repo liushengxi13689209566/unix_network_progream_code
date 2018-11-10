@@ -80,7 +80,7 @@ int Select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 pid_t Fork(void);
 int Fcntl(int fd, int cmd, int arg);
 void *Malloc(size_t size);
-void Calloc(size_t n,size_t size);
+void *Calloc(size_t n,size_t size);
 
 typedef struct info
 {

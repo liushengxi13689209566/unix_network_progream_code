@@ -20,7 +20,6 @@ int nsent;
 pid_t pid;
 int sockfd;
 
-void init_v6(void);
 void proc_v4(char *, ssize_t, struct msghdr *, struct timeval *);
 void send_v4(void);
 void readloop(void);
@@ -31,12 +30,12 @@ struct proto
 {
 	void (*fproc)(char *, ssize_t, struct msghdr *, struct timeval *);
 	void (*fsend)(void);
-	void (*finit)(void);
+	void (*finit)(void); //函数指针
 
 	struct sockaddr *sasend;
 	struct sockaddr *sarecv;
 	socklen_t salen;
 	int icmpproto;
-} *pr;
+} * pr;
 
-#endif 
+#endif

@@ -28,9 +28,9 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
 	struct addrinfo hints, *res;
 
 	bzero(&hints, sizeof(struct addrinfo));
-	hints.ai_flags = AI_CANONNAME; /* always return canonical name */
-	hints.ai_family = family;	  /* 0, AF_INET, AF_INET6, etc. */
-	hints.ai_socktype = socktype;  /* 0, SOCK_STREAM, SOCK_DGRAM, etc. */
+	hints.ai_flags = AI_CANONNAME; 
+	hints.ai_family = family;	 
+	hints.ai_socktype = socktype; 
 
 	if ((n = getaddrinfo(host, serv, &hints, &res)) != 0)
 		err_quit("host_serv error for %s, %s: %s",
@@ -38,7 +38,7 @@ Host_serv(const char *host, const char *serv, int family, int socktype)
 				 (serv == NULL) ? "(no service name)" : serv,
 				 gai_strerror(n));
 
-	return (res); /* return pointer to first on linked list */
+	return (res); 
 }
 uint16_t
 in_cksum(uint16_t *addr, int len)
@@ -183,11 +183,12 @@ int main(int argc, char **argv)
 		err_quit("use : ping <hostname> ");
 	host = argv[1];
 
-	pid = getpid() & 0xffff; //  ICMP 16位
+	pid = getpid() & 0xffff; //  ICMP 16位标识符
 	signal(SIGALRM, sig_alrm);
 
 	ai = Host_serv(host, NULL, 0, 0);
-	h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen); //将主机名转换为`ip`地址的功能,使用更加通用的协议 ipv6,简单一点就是 gethostbyname
+	h = Sock_ntop_host(ai->ai_addr, ai->ai_addrlen); //将主机名转换为`ip`地址的功能,适用更加通用的协议 ipv6,简单一点就是 gethostbyname
+
 	printf("PING %s (%s):%d data bytes \n", ai->ai_canonname ? ai->ai_canonname : h, h, datalen);
 	if (ai->ai_family == AF_INET)
 		pr = &proto_v4;

@@ -28,7 +28,7 @@ void *Malloc(size_t size)
 		err_sys("malloc error ");
 	return (ptr);
 }
-void Calloc(size_t n, size_t size)
+void *Calloc(size_t n, size_t size)
 {
 	void *ptr;
 	if ((ptr = calloc(n,size)) == NULL)

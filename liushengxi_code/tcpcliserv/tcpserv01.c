@@ -24,12 +24,16 @@ int main(int argc, char **argv)
 	socklen_t clilen;
 	struct sockaddr_in cliaddr, servaddr;
 
+    const char *ip = argv[1];
+    const int port = atoi(argv[2]);
+
 	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(SERV_PORT); //9877
+	//servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    inet_pton(AF_INET,ip,&servaddr.sin_addr);
+	servaddr.sin_port = htons(port); //9877
 
 	int opt = 1;
 	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (int *)&opt, sizeof(int));

@@ -1,34 +1,57 @@
-/*************************************************************************
-	> File Name: test.cpp
-	> Author: Liu Shengxi 
-	> Mail: 13689209566@163.com
-	> Created Time: 2018年10月15日 星期一 09时33分43秒
- ************************************************************************/
 #include <iostream>
-#include <utility>
-#include <thread>
-#include <chrono>
-#include <pthread.h>
-class Task
-{
-    public:
+#include <algorithm>
+#include <vector>
+#include <sstream>
+using namespace std;
 
-    Task(){
-        std::thread t2(f2, this); //
-        t2.join();
-    }
-    static void f2(void *arg)
+class Solution
+{
+  public:
+    vector<int> plusOne(vector<int> &digits)
     {
-        for (int i = 0; i < 5; ++i)
+        auto End_iter = digits.rbegin();
+
+        cout << "1.  *End_iter==" << *End_iter << endl;
+
+        bool tag = false;
+        (*End_iter) += 1;
+
+        if (*End_iter >= 10)
         {
-            std::cout << "Thread 2 executing\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            for (auto i = End_iter ; i != digits.rend(); i++)
+            {
+                if (*i >= 10)
+                {
+                    (*i) %= 10;
+                    if (i == digits.rend() - 1)
+                    {
+                        cout << "true::::::::::::" << endl;
+                        tag = true;
+                    }
+                    else
+                    {
+                        *(i + 1) += 1;
+                    }
+                }
+            }
+            if (tag)
+            {
+                cout << "true::::::::::::" << endl;
+                digits.insert(digits.begin(), 1); //在开头插入一个元素
+            }
         }
+        for (auto j : digits)
+            cout << j << " ";
+        cout << endl;
+        return digits;
     }
 };
 
 int main()
 {
-    Task task ;
-    std::cout << "Final value of n is "  << '\n';
+    vector<int> vv{9};
+    Solution ss;
+    ss.plusOne(vv);
+
+    return 0;
 }

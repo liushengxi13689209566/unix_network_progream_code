@@ -39,12 +39,32 @@ class ListTimer
 	{
 		if (!timer)
 			return;
-		que.pop(timer);
+		que.pop();
 	}
 	/*SIGALRM 信号被触发，就在信号处理函数中执行一次tick函数，以处理到期的任务*/
 	void tick()
 	{
+		if (que.size() == 0)
+			return;
+		std::cout << "time tick " << std::endl;
+		time_t curr = time(NULL);
+		/*从头处理到期的定时器，直到遇到一个尚未到期的定时器*/
+		while (!que.empty())
+		{
+			auto tt = que.top();
+			if (curr < tt->expire)
+			{
+				break;
+			}
+			//堆顶元素时间到期　
+			else
+			{
+				tt->cb_func(tt->user_data);
+				/*执行完就把他从队列中删除*/
+				que.pop();
+			}
 		}
+	}
 
   private:
 	/* data */

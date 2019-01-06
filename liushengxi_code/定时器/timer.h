@@ -34,9 +34,7 @@ class Timer
 		return expire > a.expire;
 	}
 
-	time_t expire; //任务的超时事件
-
-  private:
+	time_t expire;					//任务的超时事件
 	void (*cb_func)(client_data *); // 回调函数
 	client_data *user_data;			//回调函数处理的客户数据，由定时器的执行者传递给回调函数
 };

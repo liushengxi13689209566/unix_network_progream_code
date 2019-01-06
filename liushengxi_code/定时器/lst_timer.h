@@ -11,6 +11,7 @@
 #include <queue>
 #include <memory>
 #include <vector>
+#include <iostream>
 
 class ListTimer
 {
@@ -35,7 +36,7 @@ class ListTimer
 		que.push(timer);
 	}
 	/*删除定时器（肯定是优先队列的第一个元素）想想为什么？？*/
-	void DelTimer(const TimerPtr &timer)
+	void DelTimer(Timer *timer)
 	{
 		if (!timer)
 			return;
@@ -64,6 +65,13 @@ class ListTimer
 				que.pop();
 			}
 		}
+	}
+	time_t TopTime()
+	{
+		if (que.size() == 0)
+			return 5;
+		auto curr = time(NULL);
+		return que.top()->expire - curr;
 	}
 
   private:

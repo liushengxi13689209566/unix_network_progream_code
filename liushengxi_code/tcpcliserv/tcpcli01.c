@@ -12,6 +12,8 @@ void fun_client(int connfd)
 //		if (Recvline(connfd, recvline, sizeof(recvline), 0) == 0)
 
         tt = recv(connfd,recvline,sizeof(recvline),0);
+        if(tt == 0 )
+            printf("连接关闭\n");
         //printf("tt == %d \n",tt);
 
 		Fputs(recvline, stdout);

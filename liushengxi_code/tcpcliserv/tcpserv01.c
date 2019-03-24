@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 
 	int opt = 1;
 	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (int *)&opt, sizeof(int));
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEPORT, (int *)&opt, sizeof(int));
 
 	Bind(listenfd, (SA *)&servaddr, sizeof(servaddr));
 
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 	{
 		clilen = sizeof(cliaddr);
         printf("stsrt sleep !!!!!!\n");
-		sleep(100);
+		//sleep(100);
         printf("end sleep ......\n");
 		connfd = Accept(listenfd, (SA *)&cliaddr, &clilen);
 		if ((childpid = Fork()) == 0)
